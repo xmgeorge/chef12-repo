@@ -1,10 +1,8 @@
 #
 # Cookbook:: nginx
-# Attributes:: syslog
+# Recipe:: http_v2_module
 #
-# Author:: Bob Ziuchkovski (<bob@bz-technology.com>)
 #
-# Copyright:: 2014-2017, UserTesting
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,5 +17,5 @@
 # limitations under the License.
 #
 
-default['nginx']['syslog']['git_repo']     = 'https://github.com/yaoweibin/nginx_syslog_patch.git'
-default['nginx']['syslog']['git_revision'] = 'master'
+node.run_state['nginx_configure_flags'] =
+  node.run_state['nginx_configure_flags'] | ['--with-http_v2_module']

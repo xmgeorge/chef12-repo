@@ -1,6 +1,6 @@
 #
 # Cookbook:: nginx
-# Library:: matchers
+# Library:: helpers
 #
 # Author:: Tim Smith (<tsmith@chef.io>)
 #
@@ -19,17 +19,20 @@
 # limitations under the License.
 #
 
-if defined?(ChefSpec)
-  #############
-  # nginx_site
-  #############
-  ChefSpec.define_matcher :nginx_site
-
-  def enable_nginx_site(resource_name)
-    ChefSpec::Matchers::ResourceMatcher.new(:nginx_site, :enable, resource_name)
-  end
-
-  def disable_nginx_site(resource_name)
-    ChefSpec::Matchers::ResourceMatcher.new(:nginx_site, :disable, resource_name)
+# simple helper module for the nginx cookbook
+module NginxRecipeHelpers
+  # pidfile is hard to determine on Debian systems.
+  # Upstream packages and older distro releases use '/var/run/nginx.pid'
+  # systemd based distros and Ubuntu 14.04 use '/run/nginx.pid' for their
+  # packages
+  def pidfile_location
+    if (node['nginx']['repo_source'].nil? || %w(distro passenger).include?(node['nginx']['repo_source'])) &&
+       (node['init_package'] == 'systemd' || node['platform_version'].to_f == 14.04)
+      '/run/nginx.pid'
+    else
+      '/var/run/nginx.pid'
+    end
   end
 end
+
+Chef::Resource.send(:include, NginxRecipeHelpers)
