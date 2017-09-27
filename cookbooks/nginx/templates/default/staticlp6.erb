@@ -1,0 +1,49 @@
+#LP6
+server {
+            listen   <%= node['nginx']['port'] -%> default_server;
+            server_name  "";
+            client_max_body_size <%= node['nginx']['client_max_body_size'] %>;
+            root   <%= node['nginx']['default_lp6root'] %>;
+            index  index.php;
+
+            # Block all svn access
+            if ($request_uri ~* ^.*\.svn.*$) {
+               return 404;
+            }
+
+            # Block all git access
+            if ($request_uri ~* ^.*\.git.*$) {
+               return 404;
+            }
+
+            location /elb-status {
+              access_log off;
+              return 200;
+            }
+
+            location /nginx_status {
+              stub_status on;
+              access_log off;
+              allow 127.0.0.1;
+              deny all;
+            }
+
+              location /sites/ {
+                 alias <%= node['nginx']['default_lp6alias'] %>;
+                 autoindex off;
+               }
+
+            location / {
+                  try_files \$uri \$uri/ /index.php?\$args;
+            }
+
+            location ~ \.php$ {
+              try_files \$uri \$uri/ /index.php?\$args;
+              fastcgi_split_path_info ^(.+\.php)(/.+)$;
+              fastcgi_pass unix:/var/run/php/php7.0-fpm.sock;
+              fastcgi_index index.php;
+              include fastcgi_params;
+            }
+
+          }
+
