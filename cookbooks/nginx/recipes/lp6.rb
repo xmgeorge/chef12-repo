@@ -6,6 +6,17 @@
 #  variables(lazy { { pid_file: pidfile_location } })
 #end
 
+template "#{node['nginx']['dir']}/fastcgi_params" do
+  source 'fastcgi_params.erb'
+  notifies :reload, 'service[nginx]', :delayed
+end
+
+
+template "#{node['nginx']['dir']}/proxy_params" do
+  source 'proxy_params.erb'
+  notifies :reload, 'service[nginx]', :delayed
+end
+
 template "#{node['nginx']['dir']}/sites-available/lp6.conf" do
   source 'staticlp6.erb'
   notifies :reload, 'service[nginx]', :delayed
